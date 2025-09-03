@@ -1,51 +1,96 @@
 import { useState } from "react";
-import { supabase } from "../lib/supabase";
+import { supabase } from "../supabaseClient";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleLogin(e: React.FormEvent) {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMessage(null);
+    setError(null);
 
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      password,
     });
 
+    if (error) {
+      setError(error.message);
+    }
+
     setLoading(false);
-    setMessage(
-      error ? error.message : "Magic link skickad! Kolla din e-post."
-    );
-  }
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+    }
+
+    setLoading(false);
+  };
 
   return (
-    <div className="mx-auto max-w-md p-6">
-      <h1 className="mb-4 text-2xl font-semibold">Logga in</h1>
-
-      <form onSubmit={handleLogin} className="space-y-3">
+    <div style={{ maxWidth: "400px", margin: "auto", padding: "2rem" }}>
+      <h2>Login or Sign Up</h2>
+      <form>
         <input
           type="email"
-          required
+          placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="din@mail.se"
-          className="w-full rounded border px-3 py-2"
+          style={{ width: "100%", marginBottom: "1rem", padding: "0.5rem" }}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{ width: "100%", marginBottom: "1rem", padding: "0.5rem" }}
         />
 
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
         <button
-          type="submit"
+          onClick={handleLogin}
           disabled={loading}
-          className="w-full rounded bg-black py-2 text-white disabled:opacity-60"
+          style={{
+            width: "100%",
+            marginBottom: "0.5rem",
+            padding: "0.5rem",
+            background: "#2563eb",
+            color: "white",
+            border: "none",
+          }}
         >
-          {loading ? "Skickar…" : "Skicka magic link"}
+          {loading ? "Loading..." : "Login"}
+        </button>
+
+        <button
+          onClick={handleSignup}
+          disabled={loading}
+          style={{
+            width: "100%",
+            padding: "0.5rem",
+            background: "#16a34a",
+            color: "white",
+            border: "none",
+          }}
+        >
+          {loading ? "Loading..." : "Sign Up"}
         </button>
       </form>
-
-      {message && <p className="mt-4 text-sm">{message}</p>}
     </div>
   );
 }
