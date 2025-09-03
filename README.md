@@ -1,2 +1,3 @@
 # BetSpread
 Betting Spreadsheet
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/fortune14group-hub/BetSpread&env=VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY,VITE_LS_CHECKOUT_URL&project-name=betspread&repository-name=betspread)
