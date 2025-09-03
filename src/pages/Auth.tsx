@@ -1,1 +1,51 @@
-import React,{useState} from 'react'; import { supabase } from '../supabaseClient'; export default function Auth(){const [email,setEmail]=useState(''); async function signIn(e:React.FormEvent){e.preventDefault(); if(!supabase){alert('Supabase ej konfigurerad.'); return} const { error }=await supabase.auth.signInWithOtp({email, options:{ emailRedirectTo: window.location.origin }}); if(error) alert(error.message); else alert('Magic link skickad!')}} return(<div className="container-14 py-10"><div className="card max-w-md mx-auto space-y-4"><h1 className="text-xl font-bold">Logga in</h1><p className="text-neutral-400 text-sm">Skriv din e-post så skickar vi en magic link.</p><form onSubmit={signIn} className="space-y-3"><input type="email" placeholder="din@mail.se" value={email} onChange={e=>setEmail(e.target.value)}/><button className="btn" type="submit">Skicka magic link</button></form></div></div>)}
+import { useState } from "react";
+import { supabase } from "../lib/supabase";
+
+export default function Auth() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
+
+    setLoading(false);
+    setMessage(
+      error ? error.message : "Magic link skickad! Kolla din e-post."
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-md p-6">
+      <h1 className="mb-4 text-2xl font-semibold">Logga in</h1>
+
+      <form onSubmit={handleLogin} className="space-y-3">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="din@mail.se"
+          className="w-full rounded border px-3 py-2"
+        />
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded bg-black py-2 text-white disabled:opacity-60"
+        >
+          {loading ? "Skickar…" : "Skicka magic link"}
+        </button>
+      </form>
+
+      {message && <p className="mt-4 text-sm">{message}</p>}
+    </div>
+  );
+}
